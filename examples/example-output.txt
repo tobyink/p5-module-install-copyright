@@ -1,0 +1,66 @@
+
+Files: COPYRIGHT
+Copyright: None
+License: public-domain
+Comment: This file! Automatically generated.
+
+Files: META.yml
+Copyright: None
+License: public-domain
+Comment: Automatically generated metadata.
+
+Files: inc/Module/Install.pm
+Copyright: Copyright 2002 - 2012 Brian Ingerson, Audrey Tang and Adam Kennedy.
+License: Artistic or GPL-1+
+
+Files: inc/Module/Install/Base.pm
+Copyright: Copyright 2003, 2004 by Audrey Tang <autrijus@autrijus.org>.
+License: GPL-1.0+ or Artistic-1.0
+
+Files: inc/Module/Install/Include.pm
+Copyright: Copyright 2002 - 2012 Brian Ingerson, Audrey Tang and Adam Kennedy.
+License: Artistic or GPL-1+
+
+Files: inc/Module/Install/Makefile.pm
+Copyright: Copyright 2002, 2003, 2004 Audrey Tang and Brian Ingerson.
+License: GPL-1.0+ or Artistic-1.0
+
+Files: inc/Module/Install/Metadata.pm
+Copyright: Copyright 2002 - 2012 Brian Ingerson, Audrey Tang and Adam Kennedy.
+License: Artistic or GPL-1+
+
+Files: inc/Module/Install/Package.pm
+Copyright: Copyright (c) 2011. Ingy doet Net.
+License: Artistic or GPL-1+
+
+Files: inc/Module/Install/TrustMetaYml.pm
+Copyright: This software is copyright (c) 2011-2012 by Toby Inkster.
+License: GPL-1.0+ or Artistic-1.0
+
+Files: inc/Scalar/Util.pm
+Copyright: Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved. Copyright (c) 1999 Tuomas J. Lukka <lukka@iki.fi>. All rights reserved.
+License: GPL-1.0+ or Artistic-1.0
+
+Files: inc/YAML/Tiny.pm
+Copyright: Copyright 2006 - 2012 Adam Kennedy.
+License: GPL-1.0+ or Artistic-1.0
+
+Files: inc/unicore/Name.pm
+Copyright: 1993-2012, Larry Wall and others
+License: Artistic or GPL-1+
+
+Files: inc/utf8.pm
+Copyright: 1993-2012, Larry Wall and others
+License: Artistic or GPL-1+
+
+Files: lib/Module/Install/Copyright.pm
+Copyright: This software is copyright (c) 2012 by Toby Inkster.
+License: GPL-1.0+ or Artistic-1.0
+
+Files: meta/changes.pret
+Copyright: Copyright 2012 Toby Inkster.
+License: GPL-1.0+ or Artistic-1.0
+
+Files: Changes HACKING.pod LICENSE MANIFEST.SKIP Makefile.PL README inc/Module/Package/Dist/RDF.pm lib/Module/Install/Admin/Copyright.pm meta/copyrights.pret meta/doap.pret meta/makefile.pret meta/people.pret t/01basic.t
+Copyright: Unknown
+License: Unknown
