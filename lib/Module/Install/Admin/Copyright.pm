@@ -276,7 +276,7 @@ sub _determine_rights_by_convention
 	{
 		return(
 			'Copyright 2002 - 2012 Brian Ingerson, Audrey Tang and Adam Kennedy.',
-			'Artistic or GPL-1+',
+			_SL("Software::License::Perl_5"),
 		);
 	}
 	
@@ -284,7 +284,7 @@ sub _determine_rights_by_convention
 	{
 		return(
 			'Copyright (c) 2011. Ingy doet Net.',
-			'Artistic or GPL-1+',
+			_SL("Software::License::Perl_5"),
 		);
 	}
 	
@@ -292,7 +292,7 @@ sub _determine_rights_by_convention
 	{
 		return(
 			'1993-2012, Larry Wall and others',
-			'Artistic or GPL-1+',
+			_SL("Software::License::Perl_5"),
 		);
 	}
 
