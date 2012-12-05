@@ -4,6 +4,8 @@ use 5.008;
 use base qw(Module::Install::Base);
 use strict;
 
+use constant FORMAT_URI => 'http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/';
+
 use Debian::Copyright;
 use Module::Install::Admin::RDF 0.003;
 use Module::Manifest;
@@ -25,96 +27,7 @@ my $FOAF = RDF::Trine::Namespace->new('http://xmlns.com/foaf/0.1/');
 my $NFO  = RDF::Trine::Namespace->new('http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#');
 my $SKOS = RDF::Trine::Namespace->new('http://www.w3.org/2004/02/skos/core#');
 
-sub write_copyright_file
-{
-	my $self = shift;	
-	$self->_debian_copyright->write('COPYRIGHT');
-	$self->clean_files('COPYRIGHT');
-}
-
-sub _debian_copyright
-{
-	my $self = shift;
-	return $self->{_debian_copyright} if defined $self->{_debian_copyright};
-	
-	my @files = uniq COPYRIGHT => sort $self->_get_dist_files;
-	
-	my $c = 'Debian::Copyright'->new;
-	my @unknown;
-	for my $f (@files)
-	{
-		my $stanza = $self->_handle_file($f);
-		$stanza
-			? $c->files->Push($stanza->Files => $stanza)
-			: push(@unknown, $f);
-	}
-	
-	if (@unknown)
-	{
-		my $stanza = 'Debian::Copyright::Stanza::Files'->new({
-			Files     => join(q[ ], @unknown),
-			Copyright => 'Unknown',
-			License   => 'Unknown',
-		});
-		$c->files->Push($stanza->Files => $stanza);
-	}
-
-	$self->{_debian_copyright} = $c;
-}
-
-sub _get_dist_files
-{
-	my @files;
-	my $manifest = 'Module::Manifest'->new(undef, 'MANIFEST.SKIP');	
-	dir()->recurse(callback => sub {
-		my $file = shift;
-		return if $file->is_dir;
-		return if $manifest->skipped($file);
-		return if $file =~ /^(\.\/)?MYMETA\./;
-		return if $file =~ /^(\.\/)?Makefile$/;
-		push @files, $file;
-	});
-	return map { s{^[.]/}{} ; "$_" } @files;
-}
-
-sub _handle_file
-{
-	my ($self, $f) = @_;
-	my ($copyright, $licence, $comment) = $self->_determine_rights($f);
-	return unless $copyright;
-	
-	'Debian::Copyright::Stanza::Files'->new({
-		Files     => $f,
-		Copyright => $copyright,
-		License   => $licence,
-		(Comment  => $comment)x(defined $comment),
-	});
-}
-
-sub _determine_rights
-{
-	my ($self, $f) = @_;
-	
-	if (my @rights = $self->_determine_rights_from_rdf($f))
-	{
-		return @rights;
-	}
-	
-	if (my @rights = $self->_determine_rights_from_pod($f))
-	{
-		return @rights;
-	}
-	
-	if (my @rights = $self->_determine_rights_by_convention($f))
-	{
-		return @rights;
-	}
-	
-	return;
-}
-
 my %DEB = qw(
-	Software::License::AGPL_3
 	Software::License::Apache_1_1     Apache-1.1
 	Software::License::Apache_2_0     Apache-2.0
 	Software::License::Artistic_1_0   Artistic-1.0
@@ -135,11 +48,6 @@ my %DEB = qw(
 	Software::License::Zlib           Zlib
 );
 $DEB{"Software::License::Perl_5"} = "GPL-1.0+ or Artistic-1.0";
-
-sub _SL
-{
-	$DEB{ ref($_[0]) || $_[0] };
-}
 
 my %URIS = (
 	'http://www.gnu.org/licenses/agpl-3.0.txt'              => 'AGPL_3',
@@ -176,6 +84,138 @@ my %URIS = (
 	'http://www.openoffice.org/licenses/sissl_license.html' => 'Sun',
 	'http://www.zlib.net/zlib_license.html'                 => 'Zlib',
 );
+eval("require Software::License::$_") for uniq values %URIS;
+
+sub write_copyright_file
+{
+	my $self = shift;	
+	$self->_debian_copyright->write('COPYRIGHT');
+	$self->clean_files('COPYRIGHT');
+}
+
+our @Licences;
+sub _debian_copyright
+{
+	my $self = shift;
+	return $self->{_debian_copyright} if defined $self->{_debian_copyright};
+	
+	my @files = uniq COPYRIGHT => sort $self->_get_dist_files;
+	
+	my $c = 'Debian::Copyright'->new;
+	
+	$c->header(
+		'Debian::Copyright::Stanza::Header'->new({
+			Format           => FORMAT_URI,
+			Upstream_Name    => $self->name,
+			Upstream_Contact => $self->author->[0],
+			Source           => $self->homepage,
+		})
+	);
+	
+	my @unknown;
+	local @Licences = ();
+	for my $f (@files)
+	{
+		my $stanza = $self->_handle_file($f);
+		$stanza
+			? $c->files->Push($stanza->Files => $stanza)
+			: push(@unknown, $f);
+	}
+	
+	if (@unknown)
+	{
+		my $stanza = 'Debian::Copyright::Stanza::Files'->new({
+			Files     => join(q[ ], @unknown),
+			Copyright => 'Unknown',
+			License   => 'Unknown',
+		});
+		$c->files->Push($stanza->Files => $stanza);
+	}
+	
+	my %seen;
+	for my $licence (@Licences) {
+		next if $seen{ref $licence}++;
+		
+		my $licence_name;
+		if ((ref($licence) || '') =~ /^Software::License::(.+)/) {
+			push @Licences, $licence;
+			$licence_name = $DEB{ ref $licence } || $1;
+		}
+		else {
+			$licence_name = "$licence";
+		}
+		
+		chomp( my $licence_text = $licence->notice );
+		$licence_text =~ s/^/ /mg;
+		
+		my $stanza = 'Debian::Copyright::Stanza::License'->new({
+			License   => $licence_name . "\n" . $licence_text,
+		});
+		$c->licenses->Push($licence_name => $stanza);
+	}
+
+	$self->{_debian_copyright} = $c;
+}
+
+sub _get_dist_files
+{
+	my @files;
+	my $manifest = 'Module::Manifest'->new(undef, 'MANIFEST.SKIP');	
+	dir()->recurse(callback => sub {
+		my $file = shift;
+		return if $file->is_dir;
+		return if $manifest->skipped($file);
+		return if $file =~ /^(\.\/)?MYMETA\./;
+		return if $file =~ /^(\.\/)?Makefile$/;
+		push @files, $file;
+	});
+	return map { s{^[.]/}{} ; "$_" } @files;
+}
+
+sub _handle_file
+{
+	my ($self, $f) = @_;
+	my ($copyright, $licence, $comment) = $self->_determine_rights($f);
+	return unless $copyright;
+	
+	my $licence_name;
+	if ((ref($licence) || '') =~ /^Software::License::(.+)/) {
+		push @Licences, $licence;
+		$licence_name = $DEB{ ref $licence } || $1;
+	}
+	else {
+		$licence_name = "$licence";
+	}
+	
+	'Debian::Copyright::Stanza::Files'->new({
+		Files     => $f,
+		Copyright => $copyright,
+		License   => $licence_name,
+		(Comment  => $comment)x(defined $comment),
+	});
+}
+
+sub _determine_rights
+{
+	my ($self, $f) = @_;
+	
+	if (my @rights = $self->_determine_rights_from_rdf($f))
+	{
+		return @rights;
+	}
+	
+	if (my @rights = $self->_determine_rights_from_pod($f))
+	{
+		return @rights;
+	}
+	
+	if (my @rights = $self->_determine_rights_by_convention($f))
+	{
+		return @rights;
+	}
+	
+	return;
+}
 
 sub _determine_rights_from_rdf
 {
@@ -203,9 +243,9 @@ sub _determine_rights_from_rdf
 	
 	if ( my $row = $self->{_rdf_copyright_data}{$f} ) {
 		return (
-			sprintf("Copyright %d %s.", 1900 + (localtime)[5], $row->{name}->literal_value),
-			_SL($row->{class}->literal_value),
-		) if $row->{class} && _SL($row->{class}->literal_value);
+			sprintf("Copyright %d %s.", 1900 + (localtime((stat $f)[9]))[5], $row->{name}->literal_value),
+			$row->{class}->literal_value->new({holder => "the copyright holder(s)"}),
+		) if $row->{class};
 	}
 	
 	return;
@@ -236,8 +276,8 @@ sub _determine_rights_from_pod
 		
 		return(
 			$copyright,
-			_SL($guesses[0]),
-		) if $copyright && _SL($guesses[0]);
+			$guesses[0]->new({holder => 'the copyright holder(s)'}),
+		) if $copyright && $guesses[0];
 	}
 	
 	return;
@@ -276,7 +316,7 @@ sub _determine_rights_by_convention
 	{
 		return(
 			'Copyright 2002 - 2012 Brian Ingerson, Audrey Tang and Adam Kennedy.',
-			_SL("Software::License::Perl_5"),
+			"Software::License::Perl_5"->new({ holder => 'the copyright holder(s)' }),
 		);
 	}
 	
@@ -284,7 +324,7 @@ sub _determine_rights_by_convention
 	{
 		return(
 			'Copyright (c) 2011. Ingy doet Net.',
-			_SL("Software::License::Perl_5"),
+			"Software::License::Perl_5"->new({ holder => 'the copyright holder(s)' }),
 		);
 	}
 	
@@ -292,7 +332,7 @@ sub _determine_rights_by_convention
 	{
 		return(
 			'1993-2012, Larry Wall and others',
-			_SL("Software::License::Perl_5"),
+			"Software::License::Perl_5"->new({ holder => 'the copyright holder(s)' }),
 		);
 	}
 
