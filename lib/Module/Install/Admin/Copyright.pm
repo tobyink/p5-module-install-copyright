@@ -88,7 +88,7 @@ eval("require Software::License::$_") for uniq values %URIS;
 
 sub write_copyright_file
 {
-	my $self = shift;	
+	my $self = shift;
 	$self->_debian_copyright->write('COPYRIGHT');
 	$self->clean_files('COPYRIGHT');
 }
@@ -160,7 +160,7 @@ sub _debian_copyright
 sub _get_dist_files
 {
 	my @files;
-	my $manifest = 'Module::Manifest'->new(undef, 'MANIFEST.SKIP');	
+	my $manifest = 'Module::Manifest'->new(undef, 'MANIFEST.SKIP');
 	dir()->recurse(callback => sub {
 		my $file = shift;
 		return if $file->is_dir;
@@ -320,7 +320,7 @@ sub _determine_rights_by_convention
 		);
 	}
 	
-	if ($f eq 'inc/Module/Install/Package.pm') 
+	if ($f eq 'inc/Module/Install/Package.pm')
 	{
 		return(
 			'Copyright (c) 2011. Ingy doet Net.',
@@ -328,7 +328,7 @@ sub _determine_rights_by_convention
 		);
 	}
 	
-	if ($f eq 'inc/unicore/Name.pm' or $f eq 'inc/utf8.pm') 
+	if ($f eq 'inc/unicore/Name.pm' or $f eq 'inc/utf8.pm')
 	{
 		return(
 			'1993-2012, Larry Wall and others',

@@ -41,7 +41,7 @@ Makefile.PL scripts:
 
 =item C<< write_copyright_file >>
 
-=end over
+=back
 
 =head1 BUGS
 
