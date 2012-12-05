@@ -34,6 +34,15 @@ Extracts copyright and licensing information from embedded pod and/or RDF
 metadata included in the distribution, and outputs it as a text file called
 "COPYRIGHT" which should roughly conform to the Debian copyright file format.
 
+This module provides one function for use in L<Module::Install>-based
+Makefile.PL scripts:
+
+=over
+
+=item C<< write_copyright_file >>
+
+=end over
+
 =head1 BUGS
 
 Please report any bugs to

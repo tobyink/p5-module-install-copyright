@@ -349,7 +349,13 @@ Module::Install::Admin::Copyright - author-side part of Module::Install::Copyrig
 
 =head1 DESCRIPTION
 
-Not really documented much right now..
+Not really documented much right now.
+
+=begin private
+
+=item write_copyright_file
+
+=end private
 
 =head1 BUGS
 
