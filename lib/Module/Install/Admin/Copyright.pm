@@ -6,7 +6,25 @@ use strict;
 
 use constant FORMAT_URI => 'http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/';
 
-use Debian::Copyright;
+use MooX::Struct -rw,
+	CopyrightFile => [
+		qw/ $header @files @license /,
+		to_string => \&_serialize_file,
+	],
+	HeaderSection => [
+		qw/ $format $upstream_name $upstream_contact $source /,
+		to_string => \&_serialize_stanza,
+	],
+	FilesSection => [
+		qw/ @files $copyright $license $comment /,
+		to_string => \&_serialize_stanza,
+	],
+	LicenseSection => [
+		qw/ $license $body /,
+		to_string => \&_serialize_stanza,
+	],
+;
+
 use Module::Install::Admin::RDF 0.003;
 use Module::Manifest;
 use List::MoreUtils qw( uniq );
@@ -14,6 +32,41 @@ use RDF::Trine qw( iri literal statement variable );
 use Software::License;
 use Software::LicenseUtils;
 use Path::Class qw( file dir );
+
+sub _serialize_file
+{
+	my $self = shift;
+	return join "\n",
+		map $_->to_string,
+		(
+			$self->header,
+			@{ $self->files },
+			@{ $self->license },
+		);
+}
+
+sub _serialize_stanza
+{
+	my $self = shift;
+	my $str;
+	for my $f ($self->FIELDS)
+	{
+		my $v = $self->$f;
+		if ($f eq 'body') {
+			$v =~ s{^}" "mg;
+			$str .= "$v\n";
+		}
+		elsif (ref $v eq "ARRAY") {
+			$v = join "\n " => @$v;
+			$str .= "${\(ucfirst $f)}: $v\n";
+		}
+		elsif (defined $v and length $v) {
+			$v =~ s{^}" "mg;
+			$str .= "${\(ucfirst $f)}:$v\n";
+		}
+	}
+	return $str;
+}
 
 our $AUTHOR_ONLY = 1;
 our $AUTHORITY   = 'cpan:TOBYINK';
@@ -47,7 +100,6 @@ my %DEB = qw(
 	Software::License::QPL_1_0        QPL-1.0
 	Software::License::Zlib           Zlib
 );
-$DEB{"Software::License::Perl_5"} = "GPL-1.0+ or Artistic-1.0";
 
 my %URIS = (
 	'http://www.gnu.org/licenses/agpl-3.0.txt'              => 'AGPL_3',
@@ -89,7 +141,9 @@ eval("require Software::License::$_") for uniq values %URIS;
 sub write_copyright_file
 {
 	my $self = shift;
-	$self->_debian_copyright->write('COPYRIGHT');
+	open my $fh, '>', 'COPYRIGHT';
+	print {$fh} $self->_debian_copyright->to_string, "\n";
+	close $fh;
 	$self->clean_files('COPYRIGHT');
 }
 
@@ -101,36 +155,44 @@ sub _debian_copyright
 	
 	my @files = uniq COPYRIGHT => sort $self->_get_dist_files;
 	
-	my $c = 'Debian::Copyright'->new;
-	
-	$c->header(
-		'Debian::Copyright::Stanza::Header'->new({
-			Format           => FORMAT_URI,
-			Upstream_Name    => $self->name,
-			Upstream_Contact => $self->author->[0],
-			Source           => $self->homepage,
-		})
+	my $c = CopyrightFile->new(
+		files   => [],
+		license => [],
 	);
 	
-	my @unknown;
+	$c->header(
+		HeaderSection->new(
+			format           => FORMAT_URI,
+			upstream_name    => $self->name,
+			upstream_contact => $self->author->[0],
+			source           => $self->homepage,
+		),
+	);
+	
 	local @Licences = ();
+	local $; = "\034";
+	my %group_by;
 	for my $f (@files)
 	{
-		my $stanza = $self->_handle_file($f);
-		$stanza
-			? $c->files->Push($stanza->Files => $stanza)
-			: push(@unknown, $f);
+		my ($file, $copyright, $licence, $comment) = $self->_handle_file($f);		
+		push @{ $group_by{$copyright, $licence, (defined $comment ? $comment : '')} }, $file;
 	}
-	
-	if (@unknown)
-	{
-		my $stanza = 'Debian::Copyright::Stanza::Files'->new({
-			Files     => join(q[ ], @unknown),
-			Copyright => 'Unknown',
-			License   => 'Unknown',
-		});
-		$c->files->Push($stanza->Files => $stanza);
-	}
+
+	push @{ $c->files },
+		map {
+			my $key = $_;
+			my ($copyright, $licence, $comment) = split /\Q$;/;
+			FilesSection->new(
+				files     => $group_by{$key},
+				copyright => $copyright,
+				license   => $licence,
+				(comment  => $comment)x(defined $comment),
+			);
+		}
+		sort {
+			scalar(@{$group_by{$b}}) <=> scalar(@{$group_by{$a}})
+		}
+		keys %group_by;
 	
 	my %seen;
 	for my $licence (@Licences) {
@@ -145,15 +207,13 @@ sub _debian_copyright
 			$licence_name = "$licence";
 		}
 		
-		chomp( my $licence_text = $licence->notice );
-		$licence_text =~ s/^/ /mg;
-		
-		my $stanza = 'Debian::Copyright::Stanza::License'->new({
-			License   => $licence_name . "\n" . $licence_text,
-		});
-		$c->licenses->Push($licence_name => $stanza);
+		chomp( my $licence_text = $licence->notice );		
+		push @{ $c->license }, LicenseSection->new(
+			license   => $licence_name,
+			body      => $licence_text,
+		);
 	}
-
+	
 	$self->{_debian_copyright} = $c;
 }
 
@@ -176,10 +236,17 @@ sub _handle_file
 {
 	my ($self, $f) = @_;
 	my ($copyright, $licence, $comment) = $self->_determine_rights($f);
-	return unless $copyright;
+	return ($f, 'Unknown', 'Unknown') unless $copyright;
 	
 	my $licence_name;
-	if ((ref($licence) || '') =~ /^Software::License::(.+)/) {
+	if ((ref($licence) || '') eq "Software::License::Perl_5") {
+		push @Licences => (
+			"Software::License::Artistic_1_0"->new({holder => "the copyright holder(s)"}),
+			"Software::License::GPL_1"->new({holder => "the copyright holder(s)"}),
+		);
+		$licence_name = "GPL-1.0+ or Artistic-1.0";
+	}
+	elsif ((ref($licence) || '') =~ /^Software::License::(.+)/) {
 		push @Licences, $licence;
 		$licence_name = $DEB{ ref $licence } || $1;
 	}
@@ -187,12 +254,7 @@ sub _handle_file
 		$licence_name = "$licence";
 	}
 	
-	'Debian::Copyright::Stanza::Files'->new({
-		Files     => $f,
-		Copyright => $copyright,
-		License   => $licence_name,
-		(Comment  => $comment)x(defined $comment),
-	});
+	return ($f, $copyright, $licence_name, $comment);	
 }
 
 sub _determine_rights
@@ -266,7 +328,7 @@ sub _determine_rights_from_pod
 	my @guesses = 'Software::LicenseUtils'->guess_license_from_pod($text);
 	if (@guesses) {
 		my $copyright =
-			join q[ ],
+			join qq[\n],
 			map  { s/\s+$//; /[.?!]$/ ? $_ : "$_." }
 			grep { /^Copyright/i or /^This software is copyright/ }
 			split /(?:\r?\n|\r)/, $text;
@@ -287,15 +349,6 @@ sub _determine_rights_by_convention
 {
 	my ($self, $f) = @_;
 	
-	if ($f =~ /^META\.(yml|json)$/)
-	{
-		return(
-			'None',
-			'public-domain',
-			'Automatically generated metadata.',
-		);
-	}
-
 	if ($f =~ /^COPYRIGHT$/)
 	{
 		return(
