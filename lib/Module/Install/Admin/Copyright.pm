@@ -174,7 +174,7 @@ sub _debian_copyright
 	my %group_by;
 	for my $f (@files)
 	{
-		my ($file, $copyright, $licence, $comment) = $self->_handle_file($f);		
+		my ($file, $copyright, $licence, $comment) = $self->_handle_file($f);
 		push @{ $group_by{$copyright, $licence, (defined $comment ? $comment : '')} }, $file;
 	}
 
@@ -207,7 +207,7 @@ sub _debian_copyright
 			$licence_name = "$licence";
 		}
 		
-		chomp( my $licence_text = $licence->notice );		
+		chomp( my $licence_text = $licence->notice );
 		push @{ $c->license }, LicenseSection->new(
 			license   => $licence_name,
 			body      => $licence_text,
@@ -254,7 +254,7 @@ sub _handle_file
 		$licence_name = "$licence";
 	}
 	
-	return ($f, $copyright, $licence_name, $comment);	
+	return ($f, $copyright, $licence_name, $comment);
 }
 
 sub _determine_rights
