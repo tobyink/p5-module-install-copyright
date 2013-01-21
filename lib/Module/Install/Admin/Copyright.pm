@@ -70,7 +70,7 @@ sub _serialize_stanza
 
 our $AUTHOR_ONLY = 1;
 our $AUTHORITY   = 'cpan:TOBYINK';
-our $VERSION     = '0.001';
+our $VERSION     = '0.002';
 
 use RDF::Trine::Namespace qw[RDF RDFS OWL XSD];
 my $CPAN = RDF::Trine::Namespace->new('http://purl.org/NET/cpan-uri/terms#');
@@ -362,7 +362,7 @@ sub _determine_rights_by_convention
 		Admin | Admin/Include | Base | Bundle | Can | Compiler | Deprecated |
 		External | Makefile | PAR | Share | DSL | Admin/Bundle |
 		Admin/Compiler | Admin/Find | Admin/Makefile | Admin/Manifest |
-		Admin/Metadata | Admin/ScanDeps | Admin/WhiteAll | AutoInstall |
+		Admin/Metadata | Admin/ScanDeps | Admin/WriteAll | AutoInstall |
 		Base/FakeAdmin | Fetch | Include | Inline | MakeMaker | Metadata |
 		Run | Scripts | Win32 | With | WriteAll
 	).pm }x or $f eq 'inc/Module/Install.pm')
@@ -380,7 +380,15 @@ sub _determine_rights_by_convention
 			"Software::License::Perl_5"->new({ holder => 'the copyright holder(s)' }),
 		);
 	}
-	
+
+	if ($f eq 'inc/Module/Package/Dist/RDF.pm')
+	{
+		return(
+			'This software is copyright (c) 2011-2012 by Toby Inkster.',
+			"Software::License::Perl_5"->new({ holder => 'the copyright holder(s)' }),
+		);
+	}
+
 	if ($f eq 'inc/unicore/Name.pm' or $f eq 'inc/utf8.pm')
 	{
 		return(
@@ -425,7 +433,7 @@ Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
 
 =head1 COPYRIGHT AND LICENCE
 
-This software is copyright (c) 2012 by Toby Inkster.
+This software is copyright (c) 2012-2013 by Toby Inkster.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
