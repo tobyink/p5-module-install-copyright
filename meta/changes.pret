@@ -9,3 +9,9 @@
 	changeset [
 		item "Drop Debian::Copyright dependency; serialize Debian copyright format ourselves; we can do a better job!"^^Change;
 	].
+
+`Module-Install-Copyright 0.003 cpan:TOBYINK`
+	issued  2013-01-22;
+	changeset [
+		item "Underscores in stanza properties are now properly replaced with hyphens."^^Bugfix;
+	].
