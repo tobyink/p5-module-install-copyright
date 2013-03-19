@@ -40,6 +40,8 @@ sub write_credits_file
 		}
 		printf $fh "\n";
 	}
+	
+	$self->clean_files('CREDITS');
 }
 
 my @predicates = (
