@@ -15,3 +15,9 @@
 	changeset [
 		item "Underscores in stanza properties are now properly replaced with hyphens."^^Bugfix;
 	].
+
+`Module-Install-Copyright 0.004 cpan:TOBYINK`
+	issued  2013-03-19;
+	changeset [
+		item "Module::Install::Credits."^^Addition;
+	].

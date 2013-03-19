@@ -4,6 +4,10 @@ use 5.008;
 use base qw(Module::Install::Base);
 use strict;
 
+our $AUTHOR_ONLY = 1;
+our $AUTHORITY   = 'cpan:TOBYINK';
+our $VERSION     = '0.004';
+
 use Module::Install::Admin::RDF 0.003;
 use RDF::Trine qw( iri literal statement variable );
 use Path::Class qw( file dir );

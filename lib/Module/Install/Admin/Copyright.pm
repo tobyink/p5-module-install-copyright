@@ -71,7 +71,7 @@ sub _serialize_stanza
 
 our $AUTHOR_ONLY = 1;
 our $AUTHORITY   = 'cpan:TOBYINK';
-our $VERSION     = '0.003';
+our $VERSION     = '0.004';
 
 use RDF::Trine::Namespace qw[RDF RDFS OWL XSD];
 my $CPAN = RDF::Trine::Namespace->new('http://purl.org/NET/cpan-uri/terms#');
