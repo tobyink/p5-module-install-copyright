@@ -10,7 +10,6 @@ our $VERSION     = '0.004';
 
 use Module::Install::Admin::RDF 0.003;
 use RDF::Trine qw( iri literal statement variable );
-use Path::Class qw( file dir );
 
 use RDF::Trine::Namespace qw( RDF RDFS OWL XSD );
 my $DBUG = RDF::Trine::Namespace->new('http://ontologi.es/doap-bugs#');
@@ -23,7 +22,7 @@ sub write_credits_file
 	my $self   = shift;
 	my @people = $self->_people;
 	
-	my $fh = file("CREDITS")->openw;
+	open my $fh, ">:encoding(utf-8)", "CREDITS";
 	
 	for my $role (qw/ maintainer contributor thanks /)
 	{
