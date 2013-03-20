@@ -21,3 +21,9 @@
 	changeset [
 		item "Module::Install::Credits."^^Addition;
 	].
+
+`Module-Install-Copyright 0.005 cpan:TOBYINK`
+	issued  2013-03-20;
+	changeset [
+		item "Ensure CREDITS file is UTF-8 encoded."^^Change;
+	].
