@@ -27,3 +27,9 @@
 	changeset [
 		item "Ensure CREDITS file is UTF-8 encoded."^^Change;
 	].
+
+`Module-Install-Copyright 0.006 cpan:TOBYINK`
+	issued  2013-03-24;
+	changeset [
+		item "Module::Install::Credits now adds 'x_contributors' key to META.yml."^^Change;
+	].

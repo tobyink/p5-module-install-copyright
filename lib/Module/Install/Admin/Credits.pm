@@ -6,7 +6,7 @@ use strict;
 
 our $AUTHOR_ONLY = 1;
 our $AUTHORITY   = 'cpan:TOBYINK';
-our $VERSION     = '0.005';
+our $VERSION     = '0.006';
 
 use Module::Install::Contributors 0.001;
 use Module::Install::Admin::RDF 0.003;

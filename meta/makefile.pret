@@ -8,6 +8,7 @@
 	requires          p`MooX::Struct`;
 	requires          p`List::MoreUtils`;
 	requires          p`Module::Install::Admin::RDF`;
+	requires          p`Module::Install::Contributors`;
 	requires          p`Module::Manifest`;
 	requires          p`Path::Class`;
 	requires          p`Software::License`;
