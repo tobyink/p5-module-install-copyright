@@ -8,6 +8,7 @@ our $AUTHOR_ONLY = 1;
 our $AUTHORITY   = 'cpan:TOBYINK';
 our $VERSION     = '0.005';
 
+use Module::Install::Contributors 0.001;
 use Module::Install::Admin::RDF 0.003;
 use RDF::Trine qw( iri literal statement variable );
 
@@ -32,14 +33,22 @@ sub write_credits_file
 		printf $fh "%s:\n", ucfirst $role;
 		for my $person (@peeps)
 		{
-			printf $fh "- %s", ($person->{name}//$person->{nick}//$person->{nick}//next);
+			printf $fh "- %s", ($person->{name}//$person->{nick}//$person->{cpanid}//"Anon");
 			printf $fh " (cpan:%s)", uc $person->{cpanid} if $person->{cpanid};
 			printf $fh " <%s>", $person->{mbox} if $person->{mbox};
 			printf $fh "\n";
+			
+			unless ($role eq "maintainer") # maintainers are not contributors
+			{
+				my $contributor = $person->{mbox}
+					? sprintf("%s <%s>", ($person->{name}//$person->{nick}//$person->{cpanid}//"Anon"), $person->{mbox})
+					: sprintf("%s",      ($person->{name}//$person->{nick}//$person->{cpanid}//"Anon"));
+				$self->contributors($contributor);
+			}
 		}
 		printf $fh "\n";
 	}
-	
+
 	$self->clean_files('CREDITS');
 }
 
@@ -113,6 +122,7 @@ sub _people
 			map  $_->uri,
 			grep $_->is_resource,
 			$model->objects_for_predicate_list($p->{node}, $FOAF->mbox);
+		$p->{mbox} //= "$p->{cpanid}\@cpan.org" if $p->{cpanid};
 		
 		($p->{nick}) =
 			map  $_->literal_value,
