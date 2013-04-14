@@ -33,3 +33,10 @@
 	changeset [
 		item "Module::Install::Credits now adds 'x_contributors' key to META.yml."^^Change;
 	].
+
+`Module-Install-Copyright 0.007 cpan:TOBYINK`
+	issued  2013-04-14;
+	label   "Bond; James Bond";
+	changeset [
+		item "Only list contributors in 'x_contributors', not thanked people."^^Change;
+	].
