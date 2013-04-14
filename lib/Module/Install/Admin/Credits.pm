@@ -38,7 +38,7 @@ sub write_credits_file
 			printf $fh " <%s>", $person->{mbox} if $person->{mbox};
 			printf $fh "\n";
 			
-			unless ($role eq "maintainer") # maintainers are not contributors
+			if ($role eq "contributor")
 			{
 				my $contributor = $person->{mbox}
 					? sprintf("%s <%s>", ($person->{name}//$person->{nick}//$person->{cpanid}//"Anon"), $person->{mbox})
