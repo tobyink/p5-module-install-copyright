@@ -40,3 +40,9 @@
 	changeset [
 		item "Only list contributors in 'x_contributors', not thanked people."^^Change;
 	].
+
+`Module-Install-Copyright 0.008 cpan:TOBYINK`
+	issued  2013-05-01;
+	changeset [
+		item "Fix auto-generated CPAN e-mail addresses in CREDITS file."^^Bugfix;
+	].

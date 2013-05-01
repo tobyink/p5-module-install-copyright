@@ -6,7 +6,7 @@ use strict;
 
 our $AUTHOR_ONLY = 1;
 our $AUTHORITY   = 'cpan:TOBYINK';
-our $VERSION     = '0.007';
+our $VERSION     = '0.008';
 
 use Module::Install::Contributors 0.001;
 use Module::Install::Admin::RDF 0.003;
@@ -122,7 +122,7 @@ sub _people
 			map  $_->uri,
 			grep $_->is_resource,
 			$model->objects_for_predicate_list($p->{node}, $FOAF->mbox);
-		$p->{mbox} //= "$p->{cpanid}\@cpan.org" if $p->{cpanid};
+		$p->{mbox} //= sprintf('mailto:%s@cpan.org', lc($p->{cpanid})) if $p->{cpanid};
 		
 		($p->{nick}) =
 			map  $_->literal_value,
