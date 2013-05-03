@@ -46,3 +46,9 @@
 	changeset [
 		item "Fix auto-generated CPAN e-mail addresses in CREDITS file."^^Bugfix;
 	].
+
+`Module-Install-Copyright 0.009 cpan:TOBYINK`
+	issued  2013-05-03;
+	changeset [
+		item "Don't include 'mailto:' in x_contributors for META.yml; MetaCPAN doesn't seem to like it."^^Change;
+	].

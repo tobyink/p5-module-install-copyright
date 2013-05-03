@@ -6,7 +6,7 @@ use strict;
 
 our $AUTHOR_ONLY = 1;
 our $AUTHORITY   = 'cpan:TOBYINK';
-our $VERSION     = '0.008';
+our $VERSION     = '0.009';
 
 sub write_credits_file
 {
