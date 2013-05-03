@@ -40,8 +40,11 @@ sub write_credits_file
 			
 			if ($role eq "contributor")
 			{
-				my $contributor = $person->{mbox}
-					? sprintf("%s <%s>", ($person->{name}//$person->{nick}//$person->{cpanid}//"Anon"), $person->{mbox})
+				my $mbox = $person->{mbox};
+				$mbox =~ s/^mailto://i if defined $mbox;
+				
+				my $contributor = $mbox
+					? sprintf("%s <%s>", ($person->{name}//$person->{nick}//$person->{cpanid}//"Anon"), $mbox)
 					: sprintf("%s",      ($person->{name}//$person->{nick}//$person->{cpanid}//"Anon"));
 				$self->contributors($contributor);
 			}
